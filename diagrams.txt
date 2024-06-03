@@ -1,0 +1,80 @@
+Propuesta 1: Arquitectura basada en AWS Lambda, S3 y DynamoDB
+
+Diagrama:
+
+AWS Lambda (fetchTrades): Función Lambda que se activa a las 6:00 p.m. todos los días para consultar los trades ejecutados en tiempo real de los pares especificados en los exchanges.
+AWS S3: Almacena los datos obtenidos de los exchanges en archivos CSV, una carpeta por cada exchange.
+AWS Lambda (processTrades): Función Lambda que se activa cuando un archivo es subido a S3 para procesar los datos y almacenarlos en DynamoDB.
+AWS DynamoDB: Base de datos NoSQL para almacenar los datos procesados.
+AWS API Gateway: Proporciona un endpoint para que el Frontend pueda consultar la información.
+Frontend: Aplicación web para que los usuarios consulten y filtren los datos.
+
+Ventajas:
+Escalabilidad automática gracias a AWS Lambda y S3.
+Costo eficiente debido a que solo se paga por las invocaciones de Lambda y el almacenamiento utilizado en S3 y DynamoDB.
+Integración sencilla con otros servicios de AWS.
+
+Desventajas:
+Límites de ejecución de AWS Lambda pueden ser un problema si los volúmenes de datos son muy grandes.
+Latencia en el procesamiento debido a la activación de múltiples funciones Lambda.
+
+
+AWS Lambda (fetchTrades) -> AWS S3 -> AWS Lambda (processTrades) -> AWS DynamoDB
+                                                          |
+                                                      AWS API Gateway
+                                                          |
+                                                      Frontend
+
+
+Propuesta 2: Arquitectura basada en AWS EC2, S3 y DynamoDB
+
+Diagrama:
+AWS EC2: Servidor que ejecuta un script cron todos los días a las 6:00 p.m. para consultar los trades ejecutados en tiempo real de los pares especificados en los exchanges.
+AWS S3: Almacena los datos obtenidos de los exchanges en archivos CSV, una carpeta por cada exchange.
+AWS Lambda (processTrades): Función Lambda que se activa cuando un archivo es subido a S3 para procesar los datos y almacenarlos en DynamoDB.
+AWS DynamoDB: Base de datos NoSQL para almacenar los datos procesados.
+AWS API Gateway: Proporciona un endpoint para que el Frontend pueda consultar la información.
+Frontend: Aplicación web para que los usuarios consulten y filtren los datos.
+
+Ventajas:
+Control total sobre el entorno de ejecución en el servidor EC2.
+Capacidad de procesamiento puede ser más alta que en Lambda debido a la ausencia de límites de tiempo.
+
+Desventajas:
+Costo más alto debido a la necesidad de mantener el servidor EC2.
+Configuración y mantenimiento del servidor EC2 requiere más esfuerzo.
+
+
+AWS EC2 -> AWS S3 -> AWS Lambda (processTrades) -> AWS DynamoDB
+                                                |
+                                            AWS API Gateway
+                                                |
+                                            Frontend
+
+
+
+
+Propuesta 3: Arquitectura basada en AWS Batch, S3 y DynamoDB
+
+Diagrama:
+AWS Batch: Servicio que permite ejecutar trabajos programados para consultar los trades ejecutados en tiempo real de los pares especificados en los exchanges a las 6:00 p.m. todos los días.
+AWS S3: Almacena los datos obtenidos de los exchanges en archivos CSV, una carpeta por cada exchange.
+AWS Lambda (processTrades): Función Lambda que se activa cuando un archivo es subido a S3 para procesar los datos y almacenarlos en DynamoDB.
+AWS DynamoDB: Base de datos NoSQL para almacenar los datos procesados.
+AWS API Gateway: Proporciona un endpoint para que el Frontend pueda consultar la información.
+Frontend: Aplicación web para que los usuarios consulten y filtren los datos.
+
+Ventajas:
+Escalabilidad: AWS Batch puede manejar grandes volúmenes de datos y escalar según sea necesario.
+Integración con otros servicios de AWS: Fácil de configurar con S3, Lambda y DynamoDB.
+Costo eficiente: Solo se paga por los recursos utilizados durante la ejecución de los trabajos.
+
+Desventajas:
+Configuración inicial puede ser más compleja que otras soluciones.
+
+
+AWS Batch -> AWS S3 -> AWS Lambda (processTrades) -> AWS DynamoDB
+                                                |
+                                            AWS API Gateway
+                                                |
+                                            Frontend

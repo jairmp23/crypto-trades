@@ -1,0 +1,60 @@
+service: crypto-trades
+
+provider:
+  name: aws
+  runtime: python3.10
+  region: us-west-2
+  environment:
+    S3_BUCKET_NAME: ${self:service}-bucket
+    DYNAMODB_TABLE: CryptoTrades
+
+functions:
+  fetchTrades:
+    handler: handler.fetch_trades_lambda
+    events:
+      - schedule:
+          rate: cron(0 18 * * ? *)
+
+  processTrades:
+    handler: handler.process_trades_lambda
+    events:
+      - s3:
+          bucket: ${self:provider.environment.S3_BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          existing: true
+
+  queryTrades:
+    handler: handler.query_trades_lambda
+    events:
+      - http:
+          path: trades
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    CryptoTradesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: Exchange
+            AttributeType: S
+          - AttributeName: TradeID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: Exchange
+            KeyType: HASH
+          - AttributeName: TradeID
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.S3_BUCKET_NAME}
+        NotificationConfiguration:
+          LambdaConfigurations:
+            - Event: s3:ObjectCreated:*
+              Function: !GetAtt processTrades.Arn

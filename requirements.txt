@@ -1,0 +1,7 @@
+boto3
+requests
+pandas
+pytest
+moto[all]
+requests-mock
+coverage
